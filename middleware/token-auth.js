@@ -1,7 +1,7 @@
 const { StatusCodes } = require("http-status-codes");
 const { UnauthenticatedError } = require("../errors");
 const jwt = require("jsonwebtoken");
-const tokenAuthorization = (req, res) => {
+const tokenAuthorization = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
