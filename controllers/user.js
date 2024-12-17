@@ -3,7 +3,7 @@ const Product = require("../models/product");
 const { NotFoundError } = require("../errors");
 
 const getAllProducts = async (req, res) => {
-  const { category, isFeatured, name, numericFilters } = req.query;
+  const { category, isFeatured, name, numericFilters, sort } = req.query;
   const queryObject = {};
   const operatorMap = {
     ">=": "$gte",
@@ -36,7 +36,20 @@ const getAllProducts = async (req, res) => {
   if (isFeatured) {
     queryObject.isFeatured = isFeatured;
   }
-  const products = await Product.find(queryObject);
+  let result = Product.find(queryObject);
+
+  if (sort) {
+    const sortList = sort.split(",").join(" ");
+    result = result.sort(sortList);
+  } else {
+    result = result.sort("createdAt");
+  }
+  const limit = req.query.limit ? parseInt(req.query.limit) : 5;
+  const page = req.query.page ? parseInt(req.query.page) : 1;
+  const skip = (page - 1) * limit;
+
+  result = result.skip(skip).limit(limit);
+  const products = await result;
   res.status(StatusCodes.OK).json({ products });
 };
 
