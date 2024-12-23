@@ -8,13 +8,7 @@ const getAllItems = async (req, res) => {
 };
 
 const addToCart = async (req, res) => {
-  const existingItem = await Cart.findOne(
-    {
-      user_id: req.user.userId,
-    },
-    { items: { $elemMatch: { product_id: req.params.id } } }
-  );
-
+  let existingItem;
   const product = await Product.findOne({
     _id: req.params.id,
   });
@@ -23,6 +17,9 @@ const addToCart = async (req, res) => {
 
   if (cart) {
     console.log("Cart Found");
+    existingItem = cart?.items.find(
+      (item) => item.product_id.toString() === req.params.id
+    );
   }
   if (!cart) {
     console.log("Cart Not Found");
@@ -33,8 +30,8 @@ const addToCart = async (req, res) => {
   const price = product.price;
 
   if (existingItem) {
-    console.log(req.params.id, typeof req.params.id);
-    console.log(cart.items[1].product_id, typeof cart.items[1].product_id);
+    // console.log(req.params.id, typeof req.params.id);
+    // console.log(cart.items[0].product_id, typeof cart.items[0].product_id);
     cart.items = cart.items.map((item) => {
       if (item.product_id.toString() === req.params.id) {
         return {
@@ -48,16 +45,20 @@ const addToCart = async (req, res) => {
         return item;
       }
     });
-
+    cart.total_quantity += 1;
+    cart.total_price += price;
     // console.log(newItemsArray);
     console.log(cart.items);
+    console.log(cart);
   } else {
-    const newItem = {
+    let newItem = {
       product_id: req.params.id,
       quantity: 1,
       price: price,
       sub_total: price * 1,
     };
+    cart.total_quantity += 1;
+    cart.total_price += price;
     cart.items.push(newItem);
   }
 
