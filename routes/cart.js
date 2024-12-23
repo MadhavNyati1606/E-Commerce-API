@@ -4,6 +4,7 @@ const {
   deleteFromCart,
   updateQuantity,
   getAllItems,
+  reduceQuantity,
 } = require("../controllers/cart");
 const router = express.Router();
 
@@ -12,6 +13,6 @@ router
   .route("/:id")
   .post(addToCart)
   .delete(deleteFromCart)
-  .patch(updateQuantity);
+  .patch(reduceQuantity);
 
 module.exports = router;

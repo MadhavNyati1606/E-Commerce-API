@@ -1,6 +1,7 @@
 const { StatusCodes } = require("http-status-codes");
 const Cart = require("../models/cart");
 const Product = require("../models/product");
+const { NotFoundError } = require("../errors");
 
 const getAllItems = async (req, res) => {
   const cart = await Cart.find({});
@@ -68,17 +69,78 @@ const addToCart = async (req, res) => {
 };
 
 const deleteFromCart = async (req, res) => {
+  //   let cart = await Cart.findOne({ user_id: req.user.userId });
+  //   if (!cart) {
+  //     throw new NotFoundError("Cart not found");
+  //   }
+
+  //   const { id } = req.params;
+
+  //   const isPresent = cart.items.find(
+  //     (item) => item.product_id.toString() === id
+  //   );
+  //   if (!isPresent) {
+  //     throw new NotFoundError("The item is not present in the cart");
+  //   }
+
+  //   cart.total_quantity -= isPresent.quantity;
+  //   cart.total_price -= isPresent.price;
+
+  //   cart.items = cart.items.filter((item) => item.product_id.toString() !== id);
+
+  //   console.log(cart.items);
+
+  //   await cart.save();
+  //   res.status(StatusCodes.OK).json({ cart });
   const cart = await Cart.deleteMany();
   res.status(StatusCodes.OK).json({ cart });
 };
 
-const updateQuantity = (req, res) => {
-  res.send("Update the quantity");
+const reduceQuantity = async (req, res) => {
+  let cart = await Cart.findOne({ user_id: req.user.userId });
+  if (!cart) {
+    throw new NotFoundError("Cart not found");
+  }
+
+  const { id } = req.params;
+
+  const isPresent = cart.items.find(
+    (item) => item.product_id.toString() === id
+  );
+
+  if (!isPresent) {
+    throw new NotFoundError("The item is not present in the cart");
+  }
+
+  cart.items = cart.items
+    .map((item) => {
+      if (item.product_id.toString() === id) {
+        cart.total_quantity -= 1;
+        cart.total_price -= item.price;
+        console.log(item);
+        if (item.quantity > 1) {
+          return {
+            quantity: item.quantity - 1,
+            _id: item._id,
+            product_id: item.product_id,
+            price: item.price,
+            sub_total: (item.quantity - 1) * item.price,
+          };
+        } else {
+          return null;
+        }
+      }
+      return item;
+    })
+    .filter((item) => item !== null);
+  await cart.save();
+
+  res.status(StatusCodes.OK).json({ cart });
 };
 
 module.exports = {
   addToCart,
   deleteFromCart,
-  updateQuantity,
+  reduceQuantity,
   getAllItems,
 };
