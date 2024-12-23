@@ -10,12 +10,14 @@ const errorHandler = require("./middleware/error-handler");
 const notFound = require("./middleware/not-found");
 const adminTokenAuth = require("./middleware/adminTokenAuthorization");
 const tokenAuthorization = require("./middleware/token-auth");
+const cartRouter = require("./routes/cart");
 
 app.use(express.json());
 
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/admin/products", adminTokenAuth, adminRouter);
 app.use("/api/v1/user/products", tokenAuthorization, userRouter);
+app.use("/api/v1/user/cart", tokenAuthorization, cartRouter);
 
 app.use(notFound);
 app.use(errorHandler);
