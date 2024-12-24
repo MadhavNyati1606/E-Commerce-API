@@ -69,31 +69,31 @@ const addToCart = async (req, res) => {
 };
 
 const deleteFromCart = async (req, res) => {
-  //   let cart = await Cart.findOne({ user_id: req.user.userId });
-  //   if (!cart) {
-  //     throw new NotFoundError("Cart not found");
-  //   }
+  let cart = await Cart.findOne({ user_id: req.user.userId });
+  if (!cart) {
+    throw new NotFoundError("Cart not found");
+  }
 
-  //   const { id } = req.params;
+  const { id } = req.params;
 
-  //   const isPresent = cart.items.find(
-  //     (item) => item.product_id.toString() === id
-  //   );
-  //   if (!isPresent) {
-  //     throw new NotFoundError("The item is not present in the cart");
-  //   }
+  const isPresent = cart.items.find(
+    (item) => item.product_id.toString() === id
+  );
+  if (!isPresent) {
+    throw new NotFoundError("The item is not present in the cart");
+  }
 
-  //   cart.total_quantity -= isPresent.quantity;
-  //   cart.total_price -= isPresent.price;
+  cart.total_quantity -= isPresent.quantity;
+  cart.total_price -= isPresent.sub_total;
 
-  //   cart.items = cart.items.filter((item) => item.product_id.toString() !== id);
+  cart.items = cart.items.filter((item) => item.product_id.toString() !== id);
 
   //   console.log(cart.items);
 
-  //   await cart.save();
-  //   res.status(StatusCodes.OK).json({ cart });
-  const cart = await Cart.deleteMany();
+  await cart.save();
   res.status(StatusCodes.OK).json({ cart });
+  //   const cart = await Cart.deleteMany();
+  //   res.status(StatusCodes.OK).json({ cart });
 };
 
 const reduceQuantity = async (req, res) => {
