@@ -4,7 +4,7 @@ const Product = require("../models/product");
 const { NotFoundError } = require("../errors");
 
 const getAllItems = async (req, res) => {
-  const cart = await Cart.find({});
+  const cart = await Cart.find({ user_id: req.user.userId });
   res.status(StatusCodes.OK).json({ cart });
 };
 
