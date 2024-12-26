@@ -25,11 +25,30 @@ const placeOrder = async (req, res) => {
 };
 
 const updateOrderStatus = async (req, res) => {
-  res.send("Update Order Status");
+  const { id } = req.params;
+
+  const { status } = req.body;
+
+  if (status === "") {
+    throw new BadRequestError("Please enter a value for the status");
+  }
+
+  const order = await Order.findOneAndUpdate({ _id: id }, req.body, {
+    runValidators: true,
+    new: true,
+  });
+
+  res.status(StatusCodes.OK).json({ order });
+};
+
+const getAllOrdersAdmin = async (req, res) => {
+  const orders = await Order.find({});
+  res.status(StatusCodes.OK).json({ orders });
 };
 
 module.exports = {
   getAllOrders,
   updateOrderStatus,
   placeOrder,
+  getAllOrdersAdmin,
 };

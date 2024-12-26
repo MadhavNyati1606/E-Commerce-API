@@ -18,7 +18,7 @@ app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/admin/products", adminTokenAuth, adminRouter);
 app.use("/api/v1/user/products", tokenAuthorization, userRouter);
 app.use("/api/v1/user/cart", tokenAuthorization, cartRouter);
-app.use("/api/v1/user/order", tokenAuthorization, orderRouter);
+app.use("/api/v1/order", orderRouter);
 
 app.use(notFound);
 app.use(errorHandler);
