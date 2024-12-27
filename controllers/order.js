@@ -3,6 +3,7 @@ const Order = require("../models/order");
 const Cart = require("../models/cart");
 const { BadRequestError } = require("../errors");
 const Product = require("../models/product");
+const sendEmail = require("../utility/emailService");
 const getAllOrders = async (req, res) => {
   const orders = await Order.find({ user_id: req.user.userId });
   res.status(StatusCodes.OK).json({ orders });
@@ -18,7 +19,6 @@ const placeOrder = async (req, res) => {
   for (let i = 0; i < cart.items.length; i++) {
     let productId = cart.items[i].product_id;
     let product = await Product.findOne({ _id: productId });
-    console.log(product);
     if (product.stock >= cart.items[i].quantity) {
       product.stock -= cart.items[i].quantity;
       await product.save();
@@ -36,6 +36,31 @@ const placeOrder = async (req, res) => {
   };
 
   const order = await Order.create(orderItem);
+
+  const itemDescription = async (items) => {
+    const productNames = [];
+    for (let i = 0; i < items.length; i++) {
+      let product = await Product.findOne({ _id: items[i].product_id });
+      productNames.push(product.name);
+    }
+
+    return productNames.join(", ");
+  };
+
+  const { email } = req.user;
+  try {
+    const products = await itemDescription(order.items);
+    await sendEmail(
+      email,
+      "Order Placed Successfully",
+      `Your order has been placed and here are the details : 
+      Total Items: ${cart.items.length},
+      Total Amount: ${order.totalAmount},
+      Items: ${products}`
+    );
+  } catch (error) {
+    console.error("Failed to send order creation email: ", error.message);
+  }
   res.status(StatusCodes.CREATED).json({ order });
 };
 
