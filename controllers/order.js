@@ -4,6 +4,7 @@ const Cart = require("../models/cart");
 const { BadRequestError } = require("../errors");
 const Product = require("../models/product");
 const sendEmail = require("../utility/emailService");
+const User = require("../models/user");
 const getAllOrders = async (req, res) => {
   const orders = await Order.find({ user_id: req.user.userId });
   res.status(StatusCodes.OK).json({ orders });
@@ -60,6 +61,27 @@ const placeOrder = async (req, res) => {
     );
   } catch (error) {
     console.error("Failed to send order creation email: ", error.message);
+  }
+
+  try {
+    const users = await User.find({ role: "admin" });
+    const user = await User.findOne({ email: email });
+    const products = await itemDescription(order.items);
+    const userName = user.name;
+    for (let i = 0; i < users.length; i++) {
+      let adminEmail = users[i].email;
+      await sendEmail(
+        email,
+        "Order Placed Successfully",
+        `A order has been placed and here are the details : 
+        Total Items: ${cart.items.length},
+        Total Amount: ${order.totalAmount},
+        Items: ${products},
+        User: ${userName}`
+      );
+    }
+  } catch (err) {
+    console.error("Failed to send order creation email: ", err.message);
   }
   res.status(StatusCodes.CREATED).json({ order });
 };
