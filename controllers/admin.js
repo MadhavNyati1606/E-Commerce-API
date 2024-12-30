@@ -47,6 +47,10 @@ const updateProduct = async (req, res) => {
     runValidators: true,
   });
 
+  if (!product) {
+    throw new NotFoundError(`Product with id ${id} not found`);
+  }
+
   res.status(StatusCodes.OK).json({ product });
 };
 

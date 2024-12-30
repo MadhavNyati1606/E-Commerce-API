@@ -1,12 +1,17 @@
 const { StatusCodes } = require("http-status-codes");
 const Order = require("../models/order");
 const Cart = require("../models/cart");
-const { BadRequestError } = require("../errors");
+const { BadRequestError, NotFoundError } = require("../errors");
 const Product = require("../models/product");
 const sendEmail = require("../utility/emailService");
 const User = require("../models/user");
 const getAllOrders = async (req, res) => {
   const orders = await Order.find({ user_id: req.user.userId });
+  if (orders.length === 0) {
+    throw new NotFoundError(
+      "No orders found for you. Please place a new order."
+    );
+  }
   res.status(StatusCodes.OK).json({ orders });
 };
 
@@ -71,7 +76,7 @@ const placeOrder = async (req, res) => {
     for (let i = 0; i < users.length; i++) {
       let adminEmail = users[i].email;
       await sendEmail(
-        email,
+        adminEmail,
         "Order Placed Successfully",
         `A order has been placed and here are the details : 
         Total Items: ${cart.items.length},
@@ -81,7 +86,10 @@ const placeOrder = async (req, res) => {
       );
     }
   } catch (err) {
-    console.error("Failed to send order creation email: ", err.message);
+    console.error(
+      "Failed to send order creation email for admin: ",
+      err.message
+    );
   }
   res.status(StatusCodes.CREATED).json({ order });
 };
