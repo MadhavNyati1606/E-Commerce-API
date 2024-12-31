@@ -56,4 +56,14 @@ userSchema.methods.generateAuthToken = function () {
   );
 };
 
+userSchema.methods.generateRefreshToken = function () {
+  return jwt.sign(
+    { userId: this._id, email: this.email, role: this.role },
+    process.env.JWT_REFRESH_KEY,
+    {
+      expiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
+    }
+  );
+};
+
 module.exports = mongoose.model("User", userSchema);

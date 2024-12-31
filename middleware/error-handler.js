@@ -35,9 +35,6 @@ const errorHandler = (err, req, res, next) => {
 
 module.exports = errorHandler;
 
-// const { StatusCodes } = require("http-status-codes");
-// const { CustomErrorAPI } = require("../errors");
-
 // const errorHandler = (err, req, res, next) => {
 //   if (err instanceof CustomErrorAPI) {
 //     console.log(err);

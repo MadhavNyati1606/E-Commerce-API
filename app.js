@@ -12,7 +12,9 @@ const adminTokenAuth = require("./middleware/adminTokenAuthorization");
 const tokenAuthorization = require("./middleware/token-auth");
 const cartRouter = require("./routes/cart");
 const orderRouter = require("./routes/order");
+const cookieParser = require("cookie-parser");
 app.use(express.json());
+app.use(cookieParser());
 
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/admin/products", adminTokenAuth, adminRouter);
